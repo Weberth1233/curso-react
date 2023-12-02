@@ -5,7 +5,7 @@ import styles from '../../../styles/home.module.scss';
 import logoImg from '../../../public/logo.svg';
 
 import Link from 'next/link';
-import { Input } from '../../components/ui/input';
+import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 
 export default function SignUp() {
