@@ -1,32 +1,36 @@
-import axios, { AxiosError } from "axios";
-import { error } from "console";
-import { parseCookies } from "nookies";
-import { signOut } from "../context/AuthContext";
-import { AuthTokenError } from "./errors/AuthTokenError";
+import axios, { AxiosError } from 'axios'
+import { parseCookies } from 'nookies'
+import { AuthTokenError } from './errors/AuthTokenError'
+
+import { signOut } from '../contexts/AuthContext'
 
 export function setupAPIClient(ctx = undefined){
-    let cookies = parseCookies(ctx);
+  let cookies = parseCookies(ctx);
 
-    //Configurando base da api e passando o cookies pela headers da pagina
-    const api = axios.create({
-        baseURL: 'http://localhost:3333',
-        headers: {
-            Authorization: `Bearer ${cookies['@nextauth.token']}`
-        }
-    });
-    /*Os interceptores no Axios permitem que você execute código ou transforme dados antes ou depois de uma requisição ou resposta serem tratadas pelo aplicativo. No seu caso,
-     parece que você está lidando com interceptores de resposta.*/ 
-    api.interceptors.response.use(response =>{
-        return response;
-    },(error: AxiosError)=>{
-        if(error.response.status == 401){
-            if(typeof window != undefined){
-                signOut();
-            }else{
-                return Promise.reject(new AuthTokenError())
-            }
-        }
-        return Promise.reject(error);
-    });
-    return api;
+  const api = axios.create({
+    baseURL: 'http://localhost:3333',
+    headers: {
+      Authorization: `Bearer ${cookies['@nextauth.token']}`
+    }
+  })
+
+  api.interceptors.response.use(response => {
+    return response;
+  }, (error: AxiosError) => {
+    if(error.response.status === 401){
+      // qualquer erro 401 (nao autorizado) devemos deslogar o usuario
+      if(typeof window !== undefined){
+        // Chamar a funçao para deslogar o usuario
+        signOut();
+      }else{
+        return Promise.reject(new AuthTokenError())
+      }
+    }
+
+    return Promise.reject(error);
+
+  })
+
+  return api;
+
 }
